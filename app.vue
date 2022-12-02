@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="mt-20">
-        <input type="text" class="w-1/2 h10" />
+        <input type="text" class="w-1/2 h10" placeholder="Search a city..."/>
         <button class="bg-sky-400 w-20 text-white h-10">Search</button>
       </div>
     </div>
