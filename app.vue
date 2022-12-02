@@ -23,26 +23,41 @@
 
 <script setup lang="ts">
 import { Input } from 'postcss';
-
-//https://api.openweathermap.org/data/2.5/weather?q=Debrecen&appid=cef17c0d00e16108b03e2dd6314f6b30
-const search = ref('Toronto');
+const config=useRuntimeConfig()
+const cookie = useCookie("city");
+if (!cookie.value) {
+  cookie.value = 'Budapest';
+}
+const search = ref(cookie.value);
 const input = ref('');
 const background = ref('');
 //const { data: city, error } = useFetch(() => `https://api.openweathermap.org/data/2.5/weather?q=${search.value}&units=metric&appid=cef17c0d00e16108b03e2dd6314f6b30`);
 
 const { data: city, error, refresh } = useAsyncData('city', async () => {
-  const response = await $fetch(`https://api.openweathermap.org/data/2.5/weather?q=${search.value}&units=metric&appid=cef17c0d00e16108b03e2dd6314f6b30`);
-  const temp = response.main.temp;
-  if (temp <= -10) {
-    background.value = 'https://images.unsplash.com/photo-1486496146582-9ffcd0b2b2b7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
-  } else if (temp > -10 && temp <= 0) {
-    background.value = 'https://images.unsplash.com/photo-1606231056998-f6d5bff4612a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80';
-  } else if (temp > 0 && temp <= 15) {
-    background.value = 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
-  }
-  else {
-    background.value = 'https://images.unsplash.com/photo-1491929007750-dce8ba76e610?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1167&q=80';
-  }
+  let response;
+  try {
+    response = await $fetch(`https://api.openweathermap.org/data/2.5/weather?q=${search.value}`, {
+      params: {
+        units: 'metric',
+        appid: config.WEATHER_APP_SECRET
+      }
+    }
+    );
+
+    cookie.value = search.value;
+
+    const temp = response.main.temp;
+    if (temp <= -10) {
+      background.value = 'https://images.unsplash.com/photo-1486496146582-9ffcd0b2b2b7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+    } else if (temp > -10 && temp <= 0) {
+      background.value = 'https://images.unsplash.com/photo-1606231056998-f6d5bff4612a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80';
+    } else if (temp > 0 && temp <= 15) {
+      background.value = 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+    }
+    else {
+      background.value = 'https://images.unsplash.com/photo-1491929007750-dce8ba76e610?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1167&q=80';
+    }
+  } catch (e) { }
 
   return response;
 });
