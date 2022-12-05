@@ -1,12 +1,12 @@
 <template>
-  <div class="h-screen relative overflow-hidden">
+  <div v-if="city" class="h-screen relative overflow-hidden">
     <img :src="background" class="w-full" />
     <div class="absolute w-full h-full top-0 overlay" />
     <div class="absolute w-full h-full top-0 p-48">
       <div class="flex justify-between">
         <div>
           <h1 class="text-7xl text-white">{{ city.name }}</h1>
-          <p class="font-extralight text-2xl mt-2 text-white">Sunday Dec 9th</p>
+          <p class="font-extralight text-2xl mt-2 text-white">{{                   today                   }}</p>
           <img :src="`https://openweathermap.org/img/wn/${city.weather[0].icon}@4x.png`" class="w-56 icon" />
         </div>
         <div>
@@ -19,11 +19,15 @@
       </div>
     </div>
   </div>
+  <div v-else class="p-10">
+    <h1 class="text-7xl ">Oops, we can't find that city</h1>
+    <button class="mt-5 bg-sky-400 px-10 w-50 teyt-white h-10" @click="goBack">Go back</button>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { Input } from 'postcss';
-const config=useRuntimeConfig()
+const config = useRuntimeConfig();
 const cookie = useCookie("city");
 if (!cookie.value) {
   cookie.value = 'Budapest';
@@ -61,12 +65,25 @@ const { data: city, error, refresh } = useAsyncData('city', async () => {
 
   return response;
 });
+
+const today = new Date().toLocaleDateString("hu-HU",
+  {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });;
+
 const handleClick = () => {
   const formattedSearh = input.value.trim().replaceAll(' ', '+');
   search.value = formattedSearh;
   input.value = '';
   refresh();
 };
+
+const goBack = () => {
+  search.value = cookie.value;
+}
 
 </script>
 <style scoped>
